@@ -10,4 +10,23 @@ _ _ _
   - touch procFile 
   - copy & paste -> web: BuildingWebApp
 2. for dependencies
-  - using: https://github.com/tools/godep
+  - https://github.com/tools/godep
+  - godep save -r
+
+### Sub modules
+#####Routing
+- https://github.com/julienschmidt/httprouter
+
+```go
+func main() {
+    r := httprouter.New()
+    r.GET("/", HomeHandler)
+}
+
+// handler
+func HomeHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Fprintf(rw, "Home")
+}
+
+```
+
