@@ -1,0 +1,22 @@
+<component name="libraryTable">
+  <library name="GOPATH &lt;BuildingWebApp&gt;">
+    <CLASSES>
+      <root url="file://$PROJECT_DIR$/../vim-go-first" />
+      <root url="file://$PROJECT_DIR$/../github.com" />
+      <root url="file://$PROJECT_DIR$/../.DS_Store" />
+      <root url="file://$PROJECT_DIR$/../intellij1" />
+      <root url="file://$PROJECT_DIR$/../my-go" />
+    </CLASSES>
+    <JAVADOC />
+    <SOURCES />
+    <excluded>
+      <root url="file://$PROJECT_DIR$/../github.com/oxtoacart/bpool/.git" />
+      <root url="file://$PROJECT_DIR$" />
+      <root url="file://$PROJECT_DIR$/../github.com/martini-contrib/render/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/codegangsta/inject/.git" />
+      <root url="file://$PROJECT_DIR$/../github.com/go-martini/martini/.git" />
+      <root url="file://$PROJECT_DIR$/../my-go/.vendor" />
+      <root url="file://$PROJECT_DIR$/../intellij1/.idea" />
+    </excluded>
+  </library>
+</component>
