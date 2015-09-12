@@ -15,7 +15,7 @@ func main() {
 
 	http.HandleFunc("/markdown", GenerateMarkdown)
 	http.Handle("/", http.FileServer(http.Dir("public")))
-	http.ListenAndServe(":"+port, nil)
+	http.ListenAndServe(":" + port, nil)
 }
 
 func GenerateMarkdown(rw http.ResponseWriter, r *http.Request) {
