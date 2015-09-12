@@ -4,7 +4,7 @@ import (
 	"net/http"
 	"os"
 
-	"github.com/russross/blackfriday"
+	"BuildingWebApp/Godeps/_workspace/src/github.com/russross/blackfriday"
 )
 
 func main() {
@@ -15,7 +15,7 @@ func main() {
 
 	http.HandleFunc("/markdown", GenerateMarkdown)
 	http.Handle("/", http.FileServer(http.Dir("public")))
-	http.ListenAndServe(":" + port, nil)
+	http.ListenAndServe(":"+port, nil)
 }
 
 func GenerateMarkdown(rw http.ResponseWriter, r *http.Request) {
