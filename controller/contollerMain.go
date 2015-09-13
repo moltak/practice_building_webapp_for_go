@@ -25,11 +25,16 @@ type MyController struct {
 }
 
 func (c *MyController) Index(res http.ResponseWriter, req *http.Request) error {
-	c.JSON(res, 200, map[string]string{"Hello":"Json"})
+	if req.Method == "GET" {
+		c.JSON(res, 200, map[string]string{"Hello":"GET"})
+	} else {
+		c.JSON(res, 200, map[string]string{"Hello":"POST"})
+	}
 	return nil
 }
 
 func main() {
 	c := &MyController{Render: render.New(render.Options{})}
-	http.ListenAndServe(":3000", c.Action(c.Index))
+	http.Handle("/", c.Action(c.Index))
+	http.ListenAndServe(":3000", nil)
 }
