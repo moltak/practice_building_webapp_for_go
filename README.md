@@ -181,3 +181,166 @@ func main() {
 ```html
 <h1>Hello {{.}}.</h1>
 ```
+
+#####Test
+- Test needs to many codes. I have to find out better way. It is so difficult I commit that test codes to memory.
+
+```go
+import (
+	"fmt"
+	"net/http"
+)
+
+func main() {
+	http.HandleFunc("/", HelloWorld)
+	http.ListenAndServe(":3000", nil)
+}
+
+func HelloWorld(res http.ResponseWriter, req *http.Request) {
+	if req.Method == "GET" {
+		fmt.Fprint(res, "Hello World")
+	} else {
+		fmt.Fprint(res, "Hello Post")
+	}
+}
+```
+```go
+package main
+
+import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func Test_App(t *testing.T) {
+	ts := httptest.NewServer(App())
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	exp := "Before...Hello World...After"
+
+	if exp != string(body) {
+		t.Fatalf("Expected %s got %s", exp, body)
+	}
+}
+
+func Test_AppPost(t *testing.T) {
+	ts := httptest.NewServer(App())
+	defer ts.Close()
+
+	bodyType := "string"
+	res, _ := http.Post(ts.URL, bodyType, nil)
+	body, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+
+	exp := "Before...Hello Post...After"
+	if exp != string(body) {
+		t.Fatalf("Expected %s got %s", exp, body)
+	}
+}
+```
+
+- This is using negroni.
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/codegangsta/negroni"
+	"github.com/julienschmidt/httprouter"
+)
+
+func main() {
+	http.ListenAndServe(":3000", App())
+}
+
+func App() http.Handler {
+	n := negroni.Classic()
+
+	m := func(res http.ResponseWriter, req *http.Request, next http.HandlerFunc) {
+		fmt.Fprint(res, "Before...")
+		next(res, req)
+		fmt.Fprint(res, "...After")
+	}
+	n.Use(negroni.HandlerFunc(m))
+
+	r := httprouter.New()
+
+	r.GET("/", HelloWorld)
+	r.POST("/", HelloPost)
+	n.UseHandler(r)
+	return n
+}
+
+func HelloWorld(res http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	fmt.Fprint(res, "Hello World")
+}
+
+func HelloPost(res http.ResponseWriter, req *http.Request, p httprouter.Params) {
+	fmt.Fprint(res, "Hello Post")
+}
+```
+```go
+package main
+
+import (
+	"io/ioutil"
+	"net/http"
+	"net/http/httptest"
+	"testing"
+)
+
+func Test_App(t *testing.T) {
+	ts := httptest.NewServer(App())
+	defer ts.Close()
+
+	res, err := http.Get(ts.URL)
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	body, err := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+
+	if err != nil {
+		t.Fatal(err)
+	}
+
+	exp := "Before...Hello World...After"
+
+	if exp != string(body) {
+		t.Fatalf("Expected %s got %s", exp, body)
+	}
+}
+
+func Test_AppPost(t *testing.T) {
+	ts := httptest.NewServer(App())
+	defer ts.Close()
+
+	bodyType := "string"
+	res, _ := http.Post(ts.URL, bodyType, nil)
+	body, _ := ioutil.ReadAll(res.Body)
+	res.Body.Close()
+
+	exp := "Before...Hello Post...After"
+	if exp != string(body) {
+		t.Fatalf("Expected %s got %s", exp, body)
+	}
+}
+```
