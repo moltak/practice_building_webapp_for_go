@@ -4,7 +4,7 @@
 https://www.gitbook.com/book/codegangsta/building-web-apps-with-go/details
 #####계속 미루고 있었던 Go web app gitbook을 보고 실습. 
 #####Go 문법은 https://tour.golang.org/ 에서 미리 조금 공부해놓고 시작했음. (문법 잘 모름....)
-#####Go rotine, channel에 대해선 잘 모르지만 gitbook을 따라하는데는 큰 문제가 없었음. 하지만 interface, structure, closure, pointer 는 알고 있어야함. defer도 gitbook 따라하다 알게됐음. (defer 짱!)
+######Go rotine, channel에 대해선 잘 모르지만 gitbook을 따라하는데는 큰 문제가 없었음. 하지만 interface, structure, closure, pointer 는 알고 있어야함. defer도 gitbook 따라하다 알게됐음. (defer 짱!)
 
 _ _ _
 
@@ -19,7 +19,9 @@ _ _ _
   - https://github.com/go-lang-plugin-org/go-lang-idea-plugin
 3. Set $GOPATH on intellij preference -> Language & Frameworks -> Go Library -> Global Library
 
+- - -
 
+###Deploy
 #####중간에 heroku에 deploy 하는 곳이 나옴. 그런데 gitbook이 만들어진지 조금 오래되서 똑같이 따라하면 잘 안됨. 아래 godep를 사용하길 추천함.
 1. procFile has been added.
   - touch procFile 
@@ -32,28 +34,93 @@ _ _ _
 - - -
 
 ####Gitbook에 나온 내용들을 다음에 쉽게 보고 따라하려고 정리했음.
+######Go에 대해서 조금 더 익숙해 질 수 있었고 web app을 만드는 것에 대해 살짝.. 발을 담가 볼 수 있었음. 대부분은 재밌었는데 문법을 제대로 몰라서 고생한 부분도 많았고 답답한 부분도 많았음. 테스트 코드 작성하는 부분을 더 살펴봐야함.
 
 - - - -
 
-### Sub modules
-#####Routing
-- 아주 간단하게 써볼 수 있음 - > 내용 추가해야함.
-- https://github.com/julienschmidt/httprouter
+#####Basic Web app
+- 가장 기본이되는 코드이고 아주 간단하지만 이 부분을 정확히 이해해야 한다는 것을 나중에 알았음.
 
 ```go
+package main
+
+import (
+	"net/http"
+)
+
 func main() {
-    r := httprouter.New()
-    r.GET("/", HomeHandler)
+	http.HandleFunc("/", HelloWorld)
+	http.ListenAndServe(":3000", nil)
 }
 
-// handler
+func HelloWorld(rw http.ResponseWriter, r *http.Request) {
+	rw.Write([]byte("Hello World"))
+}
+```
+
+#####Routing
+- routing을 직접 구현하려면 조금 어려움. boiler plate 코드도 매우 많음. httprouter를 이용하면 아주 간단하게 routing을 구현할 수 있음.
+
+```go
+package main
+
+import (
+	"fmt"
+	"net/http"
+
+	"github.com/julienschmidt/httprouter"
+)
+
+func main() {
+	r := httprouter.New()
+	r.GET("/", HomeHandler)
+
+	// Posts collection
+	r.GET("/posts", PostsIndexHandler)
+	r.POST("/posts", PostsCreateHandler)
+
+	// Posts singular
+	r.GET("/posts/:id", PostShowHandler)
+	r.PUT("/posts/:id", PostUpdateHandler)
+	r.GET("/posts/:id/edit", PostEditHandler)
+
+	fmt.Println("Starting server on :3000")
+	http.ListenAndServe(":3000", r)
+}
+
 func HomeHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
-	fmt.Fprintf(rw, "Home")
+	fmt.Fprintln(rw, "Home")
+}
+
+func PostsIndexHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Fprintln(rw, "posts index")
+}
+
+func PostsCreateHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Fprintln(rw, "posts create")
+}
+
+func PostShowHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	id := p.ByName("id")
+	fmt.Fprintln(rw, "showing post", id)
+}
+
+func PostUpdateHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Fprintln(rw, "post update")
+}
+
+func PostDeleteHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Fprintln(rw, "post delete")
+}
+
+func PostEditHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
+	fmt.Fprintln(rw, "post edit")
 }
 ```
 
 ##### Middleware
-- "github.com/codegangsta/negroni" -> 내용 추가해야함.
+- 잘 모름 다시 봐봅시다...
+- "github.com/codegangsta/negroni" 
 
 ```go
 func main() {
@@ -524,6 +591,3 @@ func InsertBooks(db *sql.DB) {
 	}
 }
 ```
-
-- - -
-#####Go에 대해서 조금 더 익숙해 질 수 있었고 web app을 만드는 것에 대해 살짝.. 발을 담가 볼 수 있었음. 대부분은 재밌었는데 문법을 제대로 몰라서 고생한 부분도 많았고 답답한 부분도 많았음. 
