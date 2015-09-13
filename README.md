@@ -2,19 +2,25 @@
 
 ###I have been following blow link and started at Sep 12 2015
 https://www.gitbook.com/book/codegangsta/building-web-apps-with-go/details
+#####계속 미루고 있었던 Go web app gitbook을 보고 실습. 
+#####Go 문법은 https://tour.golang.org/ 에서 미리 조금 공부해놓고 시작했음. (문법 잘 모름....)
+#####Go rotine, channel에 대해선 잘 모르지만 gitbook을 따라하는데는 큰 문제가 없었음. 하지만 interface, structure, closure, pointer 는 알고 있어야함. defer도 gitbook 따라하다 알게됐음. (defer 짱!)
 
 _ _ _
 
 
 ###Editor
-######I choose the intellij and Go plugins. Intellij is easy to use and convenience.
+#####Intellij
+- intellij 는 평소에도 많이 사용하는 익숙한 툴이고 go plugin도 잘 되어 있어서 선택했음.
+- intellij에서 go plugin을 사용하려면 respository 를 추가해야함.
+- $GOPATH를 잘 설정해놓으면 plugin 설치 후 바로 go 코딩을 시작할 수 있음.
 1. Add a repository 'https://plugins.jetbrains.com/plugins/alpha/5047'
 2. Install Go-lang intellij plugin
   - https://github.com/go-lang-plugin-org/go-lang-idea-plugin
 3. Set $GOPATH on intellij preference -> Language & Frameworks -> Go Library -> Global Library
 
 
-###My go application has been deployed on heroku. 
+#####중간에 heroku에 deploy 하는 곳이 나옴. 그런데 gitbook이 만들어진지 조금 오래되서 똑같이 따라하면 잘 안됨. 아래 godep를 사용하길 추천함.
 1. procFile has been added.
   - touch procFile 
   - copy & paste -> web: BuildingWebApp
@@ -23,9 +29,15 @@ _ _ _
   - https://github.com/tools/godep
   - godep save -r
 
+- - -
+
+####Gitbook에 나온 내용들을 다음에 쉽게 보고 따라하려고 정리했음.
+
+- - - -
 
 ### Sub modules
 #####Routing
+- 아주 간단하게 써볼 수 있음 - > 내용 추가해야함.
 - https://github.com/julienschmidt/httprouter
 
 ```go
@@ -41,7 +53,7 @@ func HomeHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 ```
 
 ##### Middleware
-- "github.com/codegangsta/negroni"
+- "github.com/codegangsta/negroni" -> 내용 추가해야함.
 
 ```go
 func main() {
@@ -67,8 +79,8 @@ func MyMiddleware(rw http.ResponseWriter, r *http.Request, next http.HandlerFunc
 }
 ```
 
-##### json
-- I have to memory the how to make a json struct and json.Marshal
+#####JSON 
+- struct와 go 기본 패키지를 이용해서 쉽게 json을 rendering할 수 있음.
 
 ```go
 import (
@@ -95,11 +107,11 @@ func ShowBooks(w http.ResponseWriter, r *http.Request) {
 }
 ```
 
-######I can't solve the this quest. -> Instead of using the json.Marshal method, try using the json.Encoder API.
-
+######Gitbook에 숙제가 있었는데 해결 못했음.... Go 문법 어려워...
+- Instead of using the json.Marshal method, try using the json.Encoder API.
 
 #####HTML Templates
-- It has had two parts. Rendering part and template part. 
+- Html에 rendering 하는 부분임.
 
 ```go
 import (
@@ -141,11 +153,13 @@ func ShowBooks(w http.ResponseWriter, r *http.Request) {
 </html>
 ```
 
+######template.ParseFiles()를 request마다 수행하므로 overhead가 발생함. 저 부분을 해결하라는 숙제가 있었는데, 전역변수로 해결 했음. 더 좋은 방법이 있겠지..
 ######The html/template.ParseFiles has had overhead if you call when every coming request. You can solve it.
 
+
 #####Renderer
-- If I want to rendering JSON and HTML, there is a another way that is using the reneder.
-- It has also had two parts. The go file and tmpl file.
+- JSON이나 HTML을 rendering 할 때, Go 기본 패키지도 좋지만 open source 라이브러리가 많이 나와있음. gitbook에선 "gopkg.in/unrolled/render.v1"만 사용하지만 martini renderer를 많이 사용하는 것 같음.
+- tmpl이라는 템플릿 파일을 만들어서 렌더링함.
 
 ```go
 import (
@@ -183,7 +197,7 @@ func main() {
 ```
 
 #####Test
-- Test needs to many codes. I have to find out better way. It is so difficult I commit that test codes to memory.
+- 테스트 코드의 boiler plate 코드가 엄청 많은것 같음. 조금 더 쉽게 하는 라이브러리가 있을텐데 (찾아보진 않았음.. 아직..)
 
 ```go
 import (
@@ -253,7 +267,7 @@ func Test_AppPost(t *testing.T) {
 }
 ```
 
-- This is using negroni.
+#####negroni 를 테스트하는 부분
 
 ```go
 package main
@@ -347,7 +361,24 @@ func Test_AppPost(t *testing.T) {
 
 #####Controller
 
-- I've made one controller, controller can process GET, POST.
+- 이 부분이 문법으로도 제일 어려웠음. 뭔가 이해가 될듯 말듯 시간이 걸린 부분. type이 func도 될 수 있다는게 엄청 신기했다...
+- handler ```
+type Handler interface {
+	ServeHTTP(ResponseWriter, *Request)
+}``` 를 이용해서 직접 구현했다가 지웠다가 여러가지 트라이해봤음.. 공부는 제일 많이된듯.
+
+- ```type MyController struct {
+	AppController
+	*render.Render
+}``` 이 부분도 엄청 신기한데, field 명을 입력안하고 타입만 쓸 경우 해당 기능을 호출 할 때 자신의 함수인것처럼 하면 되더라.
+- 아래 main() 처럼 c.Action을 바로 사용할 수 있음. c.Action은 c.AppController.Action을 줄여서 사용.
+```go
+func main() {
+	c := &MyController{Render: render.New(render.Options{})}
+	http.Handle("/", c.Action(c.Index))
+	http.ListenAndServe(":3000", nil)
+}
+```
 
 ```go
 package main
@@ -436,7 +467,7 @@ func Test_ControllerMainGet(t *testing.T) {
 ```
 
 #####Database
-- I've added database codes.
+- 여기도 더 좋은 라이브러를 찾아야할거 같음.. 
 
 ```go
 package main
@@ -493,3 +524,6 @@ func InsertBooks(db *sql.DB) {
 	}
 }
 ```
+
+- - -
+#####Go에 대해서 조금 더 익숙해 질 수 있었고 web app을 만드는 것에 대해 살짝.. 발을 담가 볼 수 있었음. 대부분은 재밌었는데 문법을 제대로 몰라서 고생한 부분도 많았고 답답한 부분도 많았음. 
