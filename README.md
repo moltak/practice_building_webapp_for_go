@@ -14,7 +14,7 @@ _ _ _
 3. Set $GOPATH on intellij preference -> Language & Frameworks -> Go Library -> Global Library
 
 
-###My Go app has been deployed on heroku. 
+###My go application has been deployed on heroku. 
 1. procFile has been added.
   - touch procFile 
   - copy & paste -> web: BuildingWebApp
@@ -40,7 +40,7 @@ func HomeHandler(rw http.ResponseWriter, r *http.Request, p httprouter.Params) {
 }
 ```
 
-##### middleware
+##### Middleware
 - "github.com/codegangsta/negroni"
 
 ```go
@@ -96,3 +96,88 @@ func ShowBooks(w http.ResponseWriter, r *http.Request) {
 ```
 
 ######I can't solve the this quest. -> Instead of using the json.Marshal method, try using the json.Encoder API.
+
+
+#####HTML Templates
+- It has had two parts. Rendering part and template part. 
+
+```go
+import (
+    "html/template"
+    "net/http"
+    "path"
+)
+
+type Book struct {
+    Title  string
+    Author string
+}
+
+func main() {
+    http.HandleFunc("/", ShowBooks)
+    http.ListenAndServe(":8080", nil)
+}
+
+func ShowBooks(w http.ResponseWriter, r *http.Request) {
+    book := Book{"Building Web Apps with Go", "Jeremy Saenz"}
+
+    fp := path.Join("templates", "index.html")
+    tmpl, err := template.ParseFiles(fp)
+    if err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+        return
+    }
+
+    if err := tmpl.Execute(w, book); err != nil {
+        http.Error(w, err.Error(), http.StatusInternalServerError)
+    }
+}
+```
+
+```html
+<html>
+  <h1>{{ .Title }}</h1>
+  <h3>by {{ .Author }}</h3>
+</html>
+```
+
+######The html/template.ParseFiles has had overhead if you call when every coming request. You can solve it.
+
+#####Renderer
+- If I want to rendering JSON and HTML, there is a another way that is using the reneder.
+- It has also had two parts. The go file and tmpl file.
+
+```go
+import (
+	"net/http"
+
+	"gopkg.in/unrolled/render.v1"
+)
+
+func main() {
+	r := render.New(render.Options{})
+	mux := http.NewServeMux()
+
+	mux.HandleFunc("/", func(w http.ResponseWriter, req *http.Request) {
+		w.Write([]byte("Welcom, visit sub pages now."))
+	})
+
+	mux.HandleFunc("/data", func(w http.ResponseWriter, req *http.Request) {
+		r.Data(w, http.StatusOK, []byte("Some binary data here."))
+	})
+
+	mux.HandleFunc("/json", func(w http.ResponseWriter, req *http.Request) {
+		r.JSON(w, http.StatusOK, map[string]string{"hello":"json", "h1":"h2"})
+	})
+
+	mux.HandleFunc("/html", func(w http.ResponseWriter, req *http.Request) {
+		r.HTML(w, http.StatusOK, "example", nil)
+	})
+
+	http.ListenAndServe(":3000", mux)
+}
+```
+
+```html
+<h1>Hello {{.}}.</h1>
+```
